@@ -11,15 +11,12 @@ from torch.nn.utils.rnn import pad_sequence
 import torchvision.models as models
 import torchvision.transforms as transforms
 import timm
-from sklearn.decomposition import PCA,KernelPCA
+from sklearn.decomposition import PCA
 from sklearn.metrics import pairwise_distances
 from statistics import mean,stdev
 from sklearn.preprocessing import scale, normalize, StandardScaler
-from sklearn.metrics.pairwise import pairwise_kernels
-from sklearn.metrics.pairwise import euclidean_distances
-from scipy.stats import kendalltau
+from sklearn.metrics.pairwise import pairwise_kernels, euclidean_distances
 from scipy.stats import kendalltau, weightedtau
-from sklearn.manifold import MDS
 
 
 def find_correlation(train_vectors, val_vectors):

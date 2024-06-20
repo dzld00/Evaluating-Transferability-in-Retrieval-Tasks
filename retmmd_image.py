@@ -27,13 +27,12 @@ parser.add_argument("--kernel_type", type=str, default='rbf')
 parser.add_argument("--degree", default=1, type=int, help='Degree for polynomial kernel')
 parser.add_argument("--pretrained", action="store_false")
 parser.add_argument("--finetuned", action="store_true")
-parser.add_argument("--finetune_method", type=str, default='contrastive', choices=['cls','contrastive'])
 
 args = parser.parse_args()
 
 
 def main(args):
-    #print(args)
+    print(args)
 
     n_neg = args.n_neg  
     n_pos = args.n_pos
@@ -142,7 +141,6 @@ def main(args):
     model.eval()
 
     mmd_scores = []
-    w_scores = []
 
     # Main loop
     for idx in range(args.n_queries): 
@@ -170,14 +168,10 @@ def main(args):
         query_embedding = image_embeddings([query_path], model, transform)
 
         # Unconditioned vit embeddings
-        if 'vit' or 'deit3' in args.model_name:
+        if 'vit' in args.model_name:
             positive_embeddings = positive_image_embddings[:, 0, :].detach().cpu().numpy()
             negative_embeddings = negative_image_embddings[:, 0, :].detach().cpu().numpy()
-            query_embedding = query_embedding[:, 0, :].detach().cpu().numpy()
-            if args.finetuned and args.finetune_method == 'cls':
-                positive_embeddings = positive_image_embddings.detach().cpu().numpy()
-                negative_embeddings = negative_image_embddings.detach().cpu().numpy()
-                query_embedding = query_embedding.detach().cpu().numpy()                
+            query_embedding = query_embedding[:, 0, :].detach().cpu().numpy()               
 
         if positive_embeddings.shape[0] != args.n_pos:
             continue 

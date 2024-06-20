@@ -50,37 +50,11 @@ def image_embeddings(image_paths, model, transform):
     return embeddings_tensor
 
 
-def get_resnet_model(model_name):
-    if model_name == 'resnet18':
-        return models.resnet18(pretrained=True)
-    elif model_name == 'resnet50':
-        return models.resnet50(pretrained=True)
-    else:
-        raise ValueError(f"Unsupported model: {model_name}")
-
-
-def BC_dist(mu1, cov1, mu2, cov2):
-    mean_cov = 0.5 * (cov1 + cov2)
-    d = ((mu1 - mu2).T @ np.linalg.inv(mean_cov) @ (mu1 - mu2) / 8.).reshape(-1)[0]\
-            + np.log(np.linalg.det(mean_cov)/(np.linalg.det(cov1) * np.linalg.det(cov2))**0.5) / 2.
-    return -np.exp(-d)
-
-
 def cosine_similarity(vecA, vecB):
     dot_product = np.dot(vecA, vecB)
     normA = np.linalg.norm(vecA)
     normB = np.linalg.norm(vecB)
     return dot_product / (normA * normB)
-
-
-def gaussian_kernel(x, y, bandwidth):
-    return np.exp(-np.linalg.norm(x - y)**2 / (bandwidth**2))
-
-
-def compute_median_bandwidth(X, Y):
-    combined = np.vstack([X, Y])
-    pairwise_dists = np.linalg.norm(combined[:, np.newaxis] - combined[np.newaxis, :], axis=-1)
-    return np.median(pairwise_dists)
 
 
 def MMD(X, Y, kernel='rbf', **kwargs):
@@ -111,19 +85,6 @@ def compute_wasserstein(X, Y):
     wasserstein_distance = ot.emd2(px, py, Mxy)
     
     return wasserstein_distance
-
-
-def compute_MMD(query_embedding, other_embeddings, kernel='rbf', **kwargs):
-    n = 1  # since query_embedding is just a single point
-    m = other_embeddings.shape[0]
-
-    # Compute pairwise kernel values
-    K_QQ = pairwise_kernels(query_embedding, query_embedding, metric=kernel, **kwargs)
-    K_OO = pairwise_kernels(other_embeddings, other_embeddings, metric=kernel, **kwargs)
-    np.fill_diagonal(K_OO, 0)
-    K_QO = pairwise_kernels(query_embedding, other_embeddings, metric=kernel, **kwargs)
-
-    return K_QQ.mean() + (np.sum(K_OO) / (m * (m - 1))) - 2 * K_QO.mean()
 
 
 def permutation_test_mmd(x, y, kernel, degree=None, num_permutations=1000):
